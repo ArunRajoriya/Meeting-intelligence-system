@@ -1,0 +1,45 @@
+
+======================================================================
+MEETING NOTES
+======================================================================
+
+Meeting ID: 975335ae
+Title: Developer Meeting
+Date: 2026-04-11 21:09:31
+Participants: Members
+
+======================================================================
+MINUTES OF MEETING (MoM)
+======================================================================
+
+The meeting discussed the new features in Backdrop 1.24, including a search filter on the permissions page, access checks for files, and descriptions for roles. The team also talked about the update process and how to handle changes to the .htaccess file. Additionally, they discussed the Syslog module and its potential removal from core. The meeting also covered the idea of creating a printable status report and a views-based solution for providing easy access to information for people reporting issues. The team is working on various issues, including implementing smart menus for the admin bar and adding a copy to clipboard feature.
+
+======================================================================
+KEY POINTS
+======================================================================
+
+1. Add a warning for users who update to PHP 8 but don't have the necessary settings in their .htaccess file
+2. Consider removing the Syslog module from core due to its limited use and potential for confusion
+3. Implement a solution for providing easy access to information for people reporting issues, potentially using a views-based solution or a printable status report
+
+======================================================================
+ACTION ITEMS
+======================================================================
+
+1. Create a warning for users who update to PHP 8 but don't have the necessary settings in their .htaccess file
+   Owner: Unassigned
+   Deadline: No deadline
+
+2. Investigate the removal of the Syslog module from core
+   Owner: Unassigned
+   Deadline: No deadline
+
+3. Develop a solution for providing easy access to information for people reporting issues
+   Owner: Unassigned
+   Deadline: No deadline
+
+4. Create issues for implementing smart menus for the admin bar and adding a copy to clipboard feature
+   Owner: Unassigned
+   Deadline: No deadline
+
+======================================================================

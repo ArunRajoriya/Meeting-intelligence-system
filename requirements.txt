@@ -1,0 +1,65 @@
+# Core Framework
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-multipart>=0.0.6
+
+# AI & ML
+groq>=0.30.0
+gtts>=2.5.0
+
+# Data Validation
+pydantic>=2.7.4
+pydantic-settings>=2.10.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# Real-time Audio (for live transcription)
+pyaudio>=0.2.13
+
+# Audio Processing
+numpy>=1.24.0
+
+# PRODUCTION: Audio Processing & Transcript Cleaning
+pydub>=0.25.1
+langdetect>=1.0.9
+
+# Optional Transcription Providers
+# Uncomment the provider you want to use:
+
+# OpenAI Whisper (recommended for production)
+# openai>=1.0.0
+
+# Local Whisper (requires FFmpeg)
+# openai-whisper>=20231117
+
+# AssemblyAI
+# assemblyai>=0.17.0
+
+# PRODUCTION: Advanced Features (Optional but Recommended)
+# Uncomment for FAANG-level features:
+
+# Speaker Diarization (90%+ speaker detection)
+# pyannote.audio>=3.1.0
+# torch>=2.0.0
+# Note: Requires HuggingFace token from https://huggingface.co/settings/tokens
+
+# Named Entity Recognition (extract people, organizations, money, dates)
+# spacy>=3.7.0
+# Run after install: python -m spacy download en_core_web_sm
+
+# Optional Production Enhancements
+# Uncomment for production features:
+
+# Authentication & Security
+# python-jose[cryptography]>=3.3.0
+# passlib[bcrypt]>=1.7.4
+
+# Rate Limiting
+# slowapi>=0.1.9
+
+# Monitoring & Logging
+# sentry-sdk[fastapi]>=1.40.0
+
+# CORS
+# (already included in fastapi)
