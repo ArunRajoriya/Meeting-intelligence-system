@@ -1,3 +1,20 @@
+## Screenshots
+
+### API Documentation
+
+![Swagger UI](docs/screenshots/swagger-page.png)
+
+### Create Meeting Session
+
+![Start Meeting](docs/screenshots/start-meeting.png)
+
+### Add Meeting Transcript
+
+![Meeting Input](docs/screenshots/meeting-input.png)
+
+### AI Generated Meeting Insights
+
+![Meeting Summary](docs/screenshots/meeting-summary.png)
 # Meeting Intelligence System
 
 An AI-powered meeting assistant that records, transcribes, and summarizes your meetings automatically. It captures both your voice and the system audio simultaneously, so nobody's words get lost — whether you're in Zoom, Teams, or Google Meet.
@@ -305,23 +322,7 @@ pip install -r requirements.txt
 ```
 
 ---
-## Screenshots
 
-### API Documentation
-
-![Swagger UI](docs/screenshots/swagger-page.png)
-
-### Create Meeting Session
-
-![Start Meeting](docs/screenshots/start-meeting.png)
-
-### Add Meeting Transcript
-
-![Meeting Input](docs/screenshots/meeting-input.png)
-
-### AI Generated Meeting Insights
-
-![Meeting Summary](docs/screenshots/meeting-result.png)
 
 ## License
 
