@@ -103,5 +103,10 @@ class MeetingManager:
     def delete_meeting(self, meeting_id: str) -> bool:
         """Delete meeting from file storage"""
         return storage.delete_meeting(meeting_id)
+    
+    def force_reset(self):
+        """Force reset any stuck meeting session"""
+        self.active_meeting = None
+        print("✅ Meeting session forcefully reset")
 
 meeting_manager = MeetingManager()

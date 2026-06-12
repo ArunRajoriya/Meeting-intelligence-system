@@ -169,16 +169,24 @@ async def add_audio_input(audio: UploadFile = File(...)):
         raise HTTPException(400, "File must be audio format")
     
     try:
+        # Save uploaded file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
             content = await audio.read()
             tmp.write(content)
             tmp_path = tmp.name
         
-        with open(tmp_path, "rb") as audio_file:
-            transcript, _ = ai_service.transcribe_audio(audio_file)
+        # Transcribe
+        try:
+            with open(tmp_path, "rb") as audio_file:
+                transcript, _ = ai_service.transcribe_audio(audio_file, filename="chunk.wav")
+        finally:
+            # Always cleanup temp file
+            try:
+                os.unlink(tmp_path)
+            except:
+                pass
         
-        os.unlink(tmp_path)
-        
+        # Add to meeting
         meeting_manager.add_input(transcript)
         session = meeting_manager.get_active_meeting()
         
@@ -189,8 +197,12 @@ async def add_audio_input(audio: UploadFile = File(...)):
             "transcript_length": session.get_transcript_length()
         }
     except ValueError as e:
+        print(f"❌ ValueError: {e}")
         raise HTTPException(400, str(e))
     except Exception as e:
+        print(f"❌ Exception in audio processing: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(500, f"Audio processing failed: {str(e)}")
 
 @app.get("/meeting/status", response_model=MeetingStatusResponse)
@@ -229,9 +241,22 @@ def stop_meeting():
         return notes
     
     except ValueError as e:
+        print(f"❌ ValueError in stop_meeting: {e}")
         raise HTTPException(400, str(e))
     except Exception as e:
+        print(f"❌ Exception in stop_meeting: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(500, f"Failed to generate notes: {str(e)}")
+
+@app.post("/meeting/reset")
+def reset_meeting():
+    """🔄 Force reset/clear any stuck meeting session"""
+    try:
+        meeting_manager.force_reset()
+        return {"message": "Meeting session reset successfully"}
+    except Exception as e:
+        raise HTTPException(500, f"Reset failed: {str(e)}")
 
 @app.get("/meeting/{meeting_id}")
 def get_meeting_notes(meeting_id: str):

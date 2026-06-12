@@ -1,517 +1,311 @@
 # Meeting Intelligence System
 
-**FAANG-Level AI-powered meeting assistant** with 90%+ accuracy that captures, transcribes, and analyzes meetings in real-time, generating executive-level meeting notes with semantic understanding, multi-speaker attribution, entity extraction, and strategic insights.
+An AI-powered meeting assistant that records, transcribes, and summarizes your meetings automatically. It captures both your voice and the system audio simultaneously, so nobody's words get lost — whether you're in Zoom, Teams, or Google Meet.
 
-## 🔥 FAANG-Level Features (NEW)
+Built with Python and FastAPI, backed by Groq's Whisper for transcription and LLaMA 3.3 70B for analysis.
 
-### Production-Grade Accuracy (90%+)
-- **Audio Chunking**: 30-second chunks for +30% transcription accuracy
-- **Advanced Cleaning**: Removes hallucinations, noise, and filler words
-- **Multi-Speaker Detection**: 90%+ speaker attribution (optional)
-- **Entity Extraction**: Captures people, organizations, money, dates
-- **Confidence Scoring**: Validates output reliability
+---
 
-### Semantic Understanding
-- **Context-Aware Analysis**: Adapts to meeting type and domain
-- **Named Entity Recognition**: Structured data extraction
-- **Strict Action Filtering**: Prevents false positives
-- **Strategic Insights**: Identifies risks, opportunities, trends
-- **Funding Detection**: Extracts budget information and gaps
+## What it does
 
-### Enterprise Quality
-- **Multi-Provider Fallback**: Groq, OpenAI, AssemblyAI, Local Whisper
-- **Quality Assessment**: 100-point scoring system
-- **Professional Output**: Executive-level documentation
-- **Production Error Handling**: Graceful degradation
+The system handles the full pipeline: dual audio capture → real-time transcription → AI analysis → structured meeting notes. Output includes a plain-English summary, a list of actual decisions made, and action items with owners and deadlines — all in a consistent JSON format your other tools can consume.
 
-**See [INTEGRATION_COMPLETE.md](INTEGRATION_COMPLETE.md) for complete upgrade details**
+The AI is context-aware enough to distinguish between "we decided to use PostgreSQL" and "maybe we should look at PostgreSQL sometime." It filters suggestions, questions, and vague statements so your decision log stays clean.
 
-## 🌟 Premium Quality Features
+---
 
-### Precision Action Item Extraction
-- **100% Owner Assignment** when using structured input
-- **Exact deadline capture** from natural language
-- **Smart validation** with confidence scoring
-- **False positive prevention** with strict filtering
+## Getting started
 
-### Executive-Level Analysis
-- Professional Minutes of Meeting (MoM)
-- Detailed key points with specifics (numbers, dates, names)
-- Clear decisions with business context
-- Strategic insights and observations
-- Comprehensive speaker analysis with verbatim quotes
-
-### Quality Assurance
-- Advanced transcript preprocessing and cleaning
-- Multi-layer validation with entity extraction
-- Quality scoring system (0-100 points)
-- Professional output formatting
-- Context-aware intelligence
-
-**See [PREMIUM_QUALITY_GUIDE.md](PREMIUM_QUALITY_GUIDE.md) for achieving 95%+ accuracy**
-
-## Overview
-
-This production-ready system provides:
-- Real-time audio transcription from microphone
-- Audio file processing (MP3, WAV, M4A, FLAC, OGG)
-- AI-powered meeting analysis using Groq LLaMA 3.3
-- Speaker-specific analysis and contributions
-- Automatic action item and decision tracking
-- Named entity recognition and extraction
-- RESTful API with FastAPI
-
-**For complete project details, see [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**
-
-## Features
-
-### Core Capabilities
-- **System audio capture** (Zoom, Teams, Meet) - NEW! 🔥
-- Real-time audio transcription (10-second chunks)
-- Audio file processing with chunking (up to 25MB, ~2 hours)
-- Live note-taking during meetings
-- Multi-provider transcription with fallback
-- Advanced transcript cleaning and validation
-
-### Meeting Intelligence
-- Automatic Minutes of Meeting (MoM) generation
-- Key discussion points extraction with entity context
-- Decision tracking with business rationale
-- Action items with owners, deadlines, and confidence scores
-- Strategic insights and risk identification
-- Named entity extraction (people, organizations, money, dates)
-
-### Speaker Analysis
-- Individual speaker contributions tracking
-- Speaking time percentage per participant
-- Top keywords used by each speaker
-- Verbatim quote capture with attribution
-- Action items and decisions per speaker
-- Concerns and issues raised
-
-### Output Formats
-- Structured JSON for programmatic access
-- Human-readable TXT format
-- RESTful API with interactive documentation
-
-## Quick Start
-
-### 1. Install Dependencies
+### 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure API Key
+### 2. Set up your API key
 
-Create `.env` file:
+Create a `.env` file in the project root:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-Get your key from: https://console.groq.com/keys
+Get a free key at [console.groq.com/keys](https://console.groq.com/keys). You'll also need to enable Whisper models under [Settings → Limits](https://console.groq.com/settings/limits).
 
-### 3. Enable Groq Whisper
-
-1. Go to https://console.groq.com/settings/limits
-2. Enable Whisper models
-3. Save settings
-
-### 4. Start Server
+### 3. Start the server
 
 ```bash
 # Windows
-start.bat
+start_server.bat
 
-# Linux/Mac
-./start.sh
-
-# Or manually
+# Linux / macOS
 python main.py
 ```
 
-### 5. Use the System
+Server runs at `http://localhost:8000`. Interactive API docs are at `http://localhost:8000/docs`.
 
-**Premium Quality Sample (Recommended First):**
-```bash
-python sample_premium_meeting.py
-```
-This demonstrates EXCELLENT results with structured input.
+### 4. Start recording
 
-**Live Meeting:**
 ```bash
 python streaming_meeting.py
 ```
 
-**Process Recording:**
-```bash
-python process_my_meeting.py
-```
+The script auto-detects your audio devices, starts capturing both your mic and system audio, and transcribes every 10 seconds. When you stop the recording, it generates the full meeting notes.
 
-**Type Notes Live:**
-```bash
-python live_notes.py
-```
+---
 
-**💡 For 95%+ accuracy, see [PREMIUM_QUALITY_GUIDE.md](PREMIUM_QUALITY_GUIDE.md)**
-2. Enable Whisper models
+## Example output
 
-**Option B: Use OpenAI Whisper**
-```bash
-pip install openai
-# Add OPENAI_API_KEY to .env
-```
-
-**Option C: Use Local Whisper**
-```bash
-pip install openai-whisper
-# Install FFmpeg: https://ffmpeg.org
-```
-
-### 4. Start Server
-
-```bash
-python main.py
-```
-
-Server runs on: http://localhost:8000
-
-API docs: http://localhost:8000/docs
-
-## 📡 API Endpoints
-
-### Meeting Management
-
-```bash
-# Start a meeting
-POST /meeting/start
-{
-  "title": "Team Standup",
-  "participants": ["Alice", "Bob"]
-}
-
-# Add text input
-POST /meeting/input
-{
-  "meeting_id": "abc123",
-  "text": "We discussed the new feature..."
-}
-
-# Add audio input
-POST /meeting/input/audio
-- meeting_id: abc123
-- audio: [audio file]
-
-# Stop meeting and generate insights
-POST /meeting/stop
-{
-  "meeting_id": "abc123"
-}
-
-# Get meeting notes
-GET /meeting/{meeting_id}
-```
-
-### Voice Conversation
-
-```bash
-# Text chat
-POST /chat
-{
-  "message": "What were the key decisions?"
-}
-
-# Voice chat (audio input)
-POST /chat/voice
-- audio: [audio file]
-
-# Text-to-speech
-POST /chat/tts
-{
-  "text": "Hello, this is a test"
-}
-```
-
-## 📁 Project Structure
+Here's what a typical session looks like in the terminal:
 
 ```
-meeting-intelligence/
-├── main.py                      # FastAPI server
-├── ai_service.py                # AI processing (Groq)
-├── transcription_service.py     # Multi-provider transcription
-├── meeting_manager.py           # Meeting logic
-├── file_storage.py              # File storage
-├── speaker_analyzer.py          # Speaker analysis (NEW!)
-├── note_enhancer.py             # Note enhancement
-├── schemas.py                   # Data models
-├── config.py                    # Configuration
-├── advanced_config.py           # Advanced settings
-├── requirements.txt             # Dependencies
-├── .env                         # Environment variables
-├── .gitignore                   # Git ignore rules
-├── meeting_notes/               # Stored meetings
-│
-├── Real-time Tools:
-├── streaming_meeting.py         # Live transcription (10s chunks)
-├── realtime_meeting.py          # Live transcription (30s chunks)
-├── live_notes.py                # Type during meeting
-├── process_my_meeting.py        # Process recordings
-├── test_microphone.py           # Test audio setup
-│
-├── Testing & Demo:
-├── test_speaker_analysis.py     # Test speaker analysis
-├── demo_speaker_analysis.py     # Demo with sample meeting
-│
-├── Documentation:
-├── README.md                    # This file
-├── QUICK_START.md              # Quick start guide
-├── TESTING_GUIDE.md            # Testing guide (NEW!)
-├── SPEAKER_TIPS.md             # Speaker analysis tips (NEW!)
-├── SPEAKER_ANALYSIS_GUIDE.md   # Detailed speaker guide
-├── AUDIO_QUALITY_GUIDE.md      # Audio quality tips
-├── INTEGRATION_GUIDE.md        # Integration guide
-├── FILE_SIZE_LIMITS.md         # File size limits
-└── ... (more documentation)
-```
-├── ONGOING_MEETING_GUIDE.md    # Live meeting guide
-├── LIVE_MEETING_IMPLEMENTATION.md  # Live meeting implementation
-├── simple_meeting_client.py    # Example client
-├── live_notes.py               # Live note-taking script
-└── process_my_meeting.py       # Process recording script
+✅ System Audio: Stereo Mix (Realtek Audio)
+✅ Microphone: Microphone Array (Realtek Audio)
+
+🎧 Recording DUAL AUDIO... (capturing ALL voices)
+
+💬 [15:45:23] We decided to use PostgreSQL as our database
+----------------------------------------------------------------------
+💬 [15:45:35] Alice will complete the setup by Friday
+----------------------------------------------------------------------
+
+📊 Audio Level: [████████████░░░░░░░░] 15.3% ✅ GOOD
 ```
 
-## 🔧 Configuration
-
-### Transcription Providers
-
-The system supports multiple transcription providers with automatic fallback:
-
-1. **Groq Whisper** (Free, fast)
-2. **OpenAI Whisper** (~$0.006/min)
-3. **AssemblyAI** (Free tier available)
-4. **Local Whisper** (Free, offline)
-
-Add API keys to `.env` for the providers you want to use.
-
-### AI Models
-
-Default models (configurable in `config.py`):
-- Transcription: `whisper-large-v3-turbo`
-- Analysis: `llama-3.1-70b-versatile`
-
-## 📝 Usage Examples
-
-### Example 1: Simple Meeting Client
-
-```python
-import requests
-
-# Start meeting
-response = requests.post("http://localhost:8000/meeting/start", json={
-    "title": "Project Planning",
-    "participants": ["Alice", "Bob", "Charlie"]
-})
-meeting_id = response.json()["meeting_id"]
-
-# Add inputs
-requests.post("http://localhost:8000/meeting/input", json={
-    "meeting_id": meeting_id,
-    "text": "We need to finalize the design by Friday."
-})
-
-# Stop and get notes
-response = requests.post("http://localhost:8000/meeting/stop", json={
-    "meeting_id": meeting_id
-})
-notes = response.json()
-print(notes["summary"])
-```
-
-### Example 2: Process Audio Recording
-
-```python
-# Upload audio file
-with open("meeting_recording.mp3", "rb") as audio:
-    response = requests.post(
-        "http://localhost:8000/meeting/input/audio",
-        data={"meeting_id": meeting_id},
-        files={"audio": audio}
-    )
-```
-
-See `simple_meeting_client.py` for a complete example.
-
-## 📊 Output Format (100% Schema Compliant)
-
-Meeting notes are saved as:
-- `meeting_notes/{meeting_id}.json` - Structured data
-- `meeting_notes/{meeting_id}.txt` - Human-readable format
-
-### JSON Output Structure (EXACT SPECIFICATION)
+And the final JSON output:
 
 ```json
 {
   "meeting_id": "abc123",
-  "title": "Project Planning",
-  "date": "2026-04-10 14:30:00",
+  "title": "Product Planning",
+  "date": "2026-06-12 15:30:00",
   "participants": ["Alice", "Bob", "Charlie"],
-  "summary": "Professional executive summary (4-6 sentences)...",
+  "summary": "Team reviewed the Q3 roadmap and aligned on priorities. PostgreSQL was selected as the database for the new feature, and a September 15th launch target was confirmed. Weekly syncs were scheduled to keep the team coordinated going forward.",
   "key_decisions": [
-    "Decision 1 as string",
-    "Decision 2 as string"
+    "Launch date set for September 15th",
+    "Use PostgreSQL for the new feature",
+    "Weekly sync every Monday at 10am"
   ],
   "action_items": [
     {
-      "task": "Complete API design",
+      "task": "Complete API design document",
       "owner": "Alice",
       "deadline": "Friday"
     },
     {
-      "task": "Review database schema",
-      "owner": "",
-      "deadline": ""
+      "task": "Set up database infrastructure",
+      "owner": "Bob",
+      "deadline": "Next Monday"
     }
   ]
 }
 ```
 
-**Schema Rules:**
-- Only 3 fields in notes: `summary`, `key_decisions`, `action_items`
-- `key_decisions` is array of strings (not objects)
-- `owner` and `deadline` are strings (empty string `""` if not found, NOT null)
-- No extra fields allowed
+A human-readable `.txt` version is saved alongside the JSON in the `meeting_notes/` folder.
 
-**See [SCHEMA_COMPLIANCE.md](SCHEMA_COMPLIANCE.md) for complete specification**
+---
 
-### Text Output Example
+## Other scripts
 
-```
-======================================================================
-MEETING NOTES
-======================================================================
+**`process_my_meeting.py`** — for processing a pre-recorded audio file instead of live input. Edit the file to set the title, participants, and file path before running.
 
-Meeting ID: abc123
-Title: Team Standup
-Date: 2024-01-15 10:30:00
-Participants: Alice, Bob, Charlie
+**`test_microphone.py`** — run this before a meeting to confirm your mic is working and at the right level. Shows live audio levels so you can spot issues before they matter.
 
-======================================================================
-MINUTES OF MEETING (MoM)
-======================================================================
+---
 
-The team discussed progress on the new feature. Design phase is 80% 
-complete with final mockups pending. Backend API requires review before 
-testing phase. Testing scheduled to begin next week with full team 
-participation.
-
-======================================================================
-KEY DECISIONS
-======================================================================
-
-1. Launch date set for March 1st
-2. Backend API review required before testing
-3. Full team participation in testing phase
-
-======================================================================
-ACTION ITEMS
-======================================================================
-
-1. Complete design mockups
-   Owner: Alice
-   Deadline: Friday
-
-2. Review backend API
-   Owner: Bob
-   Deadline: Next Monday
-
-3. Prepare testing environment
-   Owner: Unassigned
-   Deadline: No deadline
-
-======================================================================
-```
-
-## 💡 Tips for Best Results
-
-### Use Structured Input Format
-
-For maximum accuracy (90%+), use clear speaker attribution:
+## Architecture
 
 ```
-✅ EXCELLENT:
-"Alice: We decided to use PostgreSQL as our database."
-"Bob will complete the setup by Friday."
-"Team agreed to have weekly meetings every Monday."
-
-❌ POOR:
-"I think we should..." (no name)
-"Someone will do it" (unclear who)
-"Maybe next week" (vague)
+┌─────────────────────────────────────────────────────────────┐
+│                      FastAPI Server                         │
+│                        (main.py)                            │
+│  21 API Endpoints: /meeting/*, /chat/*, /transcribe/*      │
+└─────────────────────────────────────────────────────────────┘
+                              │
+            ┌─────────────────┴─────────────────┐
+            │                                   │
+┌───────────▼──────────┐            ┌──────────▼───────────┐
+│   AI Service         │            │  Meeting Manager     │
+│  (ai_service.py)     │            │ (meeting_manager.py) │
+│                      │            │                      │
+│ • LLaMA 3.3 70B      │            │ • State Management   │
+│ • Context-Aware      │            │ • Session Tracking   │
+│ • Multi-Pass Analysis│            │ • Notes Storage      │
+└──────────┬───────────┘            └──────────────────────┘
+           │
+    ┌──────┴──────┐
+    │             │
+┌───▼────┐   ┌───▼────────────┐
+│Transcr.│   │   Analyzers    │
+│Service │   │                │
+│        │   │ • Decisions    │
+│Groq /  │   │ • Action Items │
+│OpenAI /│   │ • Confidence   │
+│Local   │   │ • Deduplication│
+└────────┘   └────────────────┘
 ```
 
-### Be Explicit
+### File layout
 
-- **Mention names**: "Bob will do X" (not "someone will")
-- **State deadlines**: "by Friday", "next week" (not "soon")
-- **Declare decisions**: "we decided", "team agreed" (not "maybe")
+```
+Meeting/
+├── main.py                      # FastAPI server + all endpoints
+├── ai_service.py                # AI orchestration (prompts, analysis)
+├── transcription_service_v2.py  # Groq / OpenAI / local Whisper
+├── meeting_manager.py           # Session lifecycle and state
+├── file_storage.py              # Saves JSON and TXT output
+├── schemas.py                   # Pydantic models
+├── config.py                    # Config and env vars
+├── analyzers.py                 # Decision and action item extraction
+├── meeting_intelligence.py      # Meeting type detection
+├── utilities.py                 # Text helpers
+│
+├── streaming_meeting.py         # Live transcription tool
+├── process_my_meeting.py        # Offline recording processor
+├── test_microphone.py           # Mic diagnostics
+│
+├── audio_level_monitor.py       # Real-time audio monitoring
+├── requirements.txt
+├── .env.example
+├── start_server.bat
+│
+└── meeting_notes/               # All saved meetings (JSON + TXT)
+```
 
-### Quality Factors
+---
 
-- **Clean audio**: Use system audio capture for best quality
-- **Clear speech**: Minimize background noise
-- **Structured format**: Use speaker attribution
-- **Explicit statements**: Avoid vague language
+## Transcription providers
 
-**See [SCHEMA_COMPLIANCE.md](SCHEMA_COMPLIANCE.md) for complete best practices**
+Groq Whisper is the default — it's fast, free on the generous tier, and accurate. If it's unavailable, the system falls back to OpenAI Whisper automatically. A local Whisper option is also available if you need offline processing or want to keep audio off the network entirely.
 
-## 🔒 Security Notes
+---
 
-- Keep `.env` file secure (never commit to git)
-- API keys are sensitive - use environment variables
-- Consider adding authentication for production use
-- File uploads are limited to 25MB
+## Tips for better results
 
-## 📚 Documentation
+The AI works with what the transcript gives it. Vague audio leads to vague notes. A few habits that make a noticeable difference:
 
-### For Users
-- **PREMIUM_QUALITY_GUIDE.md** - Achieving 95%+ accuracy (START HERE) ⭐
-- **USER_GUIDE.md** - Complete user guide with all features
-- **SPEAKER_ANALYSIS_GUIDE.md** - Detailed speaker analysis features
-- **INTEGRATION_GUIDE.md** - API integration examples
+- Say names when assigning tasks: "Bob will handle the setup" beats "someone should do that"
+- State deadlines explicitly: "by end of Friday" is better than "soon"
+- Use clear decision language: "we agreed to..." or "the team decided..." signals a real decision vs. a passing comment
+- Keep your mic volume at 100% with +30dB boost (see troubleshooting below if you're not sure how)
 
-### For Deployment
-- **DEPLOYMENT_GUIDE.md** - Production deployment and configuration
-- **PRODUCTION_CHECKLIST.md** - Step-by-step deployment checklist
-- **ACCURACY_IMPROVEMENTS.md** - AI accuracy optimization details
+---
 
-### Quick Reference
-- **README.md** - This file (overview and quick start)
-- **PROJECT_SUMMARY.md** - Executive summary for project managers
-- API Documentation - http://localhost:8000/docs (when server is running)
+## Troubleshooting
 
-## 🐛 Troubleshooting
+### Microphone showing 0.0% audio level
 
-### Whisper Models Blocked
-If you see "model blocked at organization level":
-1. Go to https://console.groq.com/settings/limits
-2. Enable Whisper models
-3. Or use alternative provider (OpenAI, Local)
+```
+📊 Audio Level: [░░░░░░░░░░░░░░░░░░░░] 0.0% ❌ VERY LOW
+```
 
-### Audio Transcription Fails
-- Check file size (max 25MB)
-- Ensure audio format is supported (mp3, wav, m4a)
-- Verify transcription provider is configured
+On Windows, check: **Settings → Privacy & Security → Microphone**, and make sure both "Microphone access" and "Let desktop apps access your microphone" are enabled.
 
-### Server Won't Start
-- Check port 8000 is available
-- Verify all dependencies installed
-- Check `.env` file exists with GROQ_API_KEY
+Then: right-click the speaker icon → Sounds → Recording tab → select your mic → Properties → Levels → set Microphone to **100** and Microphone Boost to **+30dB**.
 
-## 📄 License
+Run `python test_microphone.py` — you should see levels above 500 while speaking.
 
-This project is provided as-is for educational and commercial use.
+### PortAudio initialization error
 
-## 🤝 Support
+```
+❌ Failed to initialize audio: [Errno -10000] PortAudio not initialized
+```
 
-For issues or questions, check the documentation files or review the API docs at http://localhost:8000/docs when the server is running.
+Close any apps using audio (Zoom, Teams, Discord, browser tabs with audio), wait 10 seconds, and try again. If that doesn't work, a restart usually clears it.
+
+### Whisper models blocked
+
+```
+model blocked at organization level
+```
+
+Go to [console.groq.com/settings/limits](https://console.groq.com/settings/limits) and enable Whisper models. Alternatively, configure OpenAI Whisper or local Whisper as a fallback in your `.env`.
+
+---
+
+## Configuration
+
+### Environment variables
+
+```env
+# Required
+GROQ_API_KEY=your_groq_api_key
+
+# Optional fallbacks
+OPENAI_API_KEY=your_openai_api_key
+ASSEMBLYAI_API_KEY=your_assemblyai_api_key
+HUGGINGFACE_TOKEN=your_hf_token
+```
+
+### Audio defaults (in `streaming_meeting.py`)
+
+| Setting | Value |
+|---|---|
+| Chunk size | 1024 samples |
+| Format | 16-bit PCM |
+| Channels | 2 (stereo) |
+| Sample rate | 44100 Hz |
+| Transcription interval | Every 10 seconds |
+
+---
+
+## API endpoints
+
+```
+POST /meeting/start
+POST /meeting/stop
+GET  /meeting/{meeting_id}
+POST /meeting/input
+POST /meeting/input/audio
+
+POST /transcribe/audio
+POST /transcribe/file
+
+POST /chat
+POST /chat/voice
+POST /chat/tts
+```
+
+Full interactive documentation available at `http://localhost:8000/docs` when the server is running.
+
+---
+
+## Security notes
+
+API keys stay in `.env` and never get committed to version control. Audio is processed locally — only the transcription step sends data externally (to Groq or OpenAI, depending on your config). Meeting notes are stored locally in `meeting_notes/`.
+
+For production deployments, you'll want to add authentication to the API endpoints, enable HTTPS, and consider encrypting stored notes if meetings contain sensitive content.
+
+---
+
+## Roadmap
+
+- Speaker identification (attribute quotes to specific people)
+- Multi-language support
+- Meeting sentiment analysis
+- Calendar app integration
+- Slack / Teams bot
+- Real-time collaborative editing of generated notes
+
+---
+
+## Dependencies
+
+- `fastapi` — web framework
+- `groq` — Groq API client
+- `pydantic` — data validation
+- `pyaudio` — audio capture
+- `numpy` — audio processing
+- `openai` — OpenAI Whisper fallback (optional)
+- `whisper` — local transcription (optional)
+- `gtts` — text-to-speech (optional)
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## License
+
+These project can be used for educational purpose

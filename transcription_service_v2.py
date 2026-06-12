@@ -68,14 +68,17 @@ class TranscriptionServiceV2:
         
         print("🔧 Using chunked transcription for optimal accuracy...")
         
-        # Save uploaded file temporarily
+        # Save uploaded file temporarily with proper Windows handling
         temp_input = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1])
         temp_input.write(audio_file.read())
         temp_input.close()
         
+        temp_input_path = temp_input.name
+        chunk_files = []  # Initialize here to avoid UnboundLocalError
+        
         try:
             # Load audio
-            audio = AudioSegment.from_file(temp_input.name)
+            audio = AudioSegment.from_file(temp_input_path)
             
             # Check duration
             duration_seconds = len(audio) / 1000.0
@@ -99,16 +102,17 @@ class TranscriptionServiceV2:
             for i, chunk in enumerate(chunks, 1):
                 # Export chunk to temp file
                 chunk_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
-                chunk.export(chunk_file.name, format="mp3")
+                chunk_file_path = chunk_file.name
+                chunk_file.close()
+                chunk_files.append(chunk_file_path)
+                
+                chunk.export(chunk_file_path, format="mp3")
                 
                 # Transcribe chunk
-                with open(chunk_file.name, 'rb') as f:
+                with open(chunk_file_path, 'rb') as f:
                     chunk_transcript, confidence = self._transcribe_direct(f, f"chunk_{i}.mp3")
                     transcripts.append(chunk_transcript)
                     total_confidence += confidence
-                
-                # Cleanup
-                os.unlink(chunk_file.name)
                 
                 print(f"  ✅ Chunk {i}/{len(chunks)} processed")
             
@@ -124,9 +128,19 @@ class TranscriptionServiceV2:
             return full_transcript, avg_confidence
             
         finally:
-            # Cleanup
-            if os.path.exists(temp_input.name):
-                os.unlink(temp_input.name)
+            # Cleanup all temp files with Windows-safe deletion
+            import time
+            for path in [temp_input_path] + chunk_files:
+                if os.path.exists(path):
+                    try:
+                        os.unlink(path)
+                    except PermissionError:
+                        # Windows file locking - wait and retry
+                        time.sleep(0.1)
+                        try:
+                            os.unlink(path)
+                        except:
+                            pass  # Give up, OS will clean eventually
     
     def _transcribe_direct(self, audio_file: BinaryIO, filename: str) -> Tuple[str, float]:
         """Direct transcription with provider fallback"""

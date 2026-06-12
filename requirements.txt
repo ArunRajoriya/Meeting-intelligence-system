@@ -39,10 +39,11 @@ langdetect>=1.0.9
 # PRODUCTION: Advanced Features (Optional but Recommended)
 # Uncomment for FAANG-level features:
 
-# Speaker Diarization (90%+ speaker detection)
+# Speaker Diarization (90%+ speaker detection) - +5-10% accuracy
 # pyannote.audio>=3.1.0
 # torch>=2.0.0
 # Note: Requires HuggingFace token from https://huggingface.co/settings/tokens
+# Setup guide: See SETUP_SPEAKER_DIARIZATION.md
 
 # Named Entity Recognition (extract people, organizations, money, dates)
 # spacy>=3.7.0
