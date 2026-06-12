@@ -14,8 +14,6 @@ pydantic-settings>=2.10.0
 # Environment
 python-dotenv>=1.0.0
 
-# Real-time Audio (for live transcription)
-pyaudio>=0.2.13
 
 # Audio Processing
 numpy>=1.24.0
