@@ -305,6 +305,23 @@ pip install -r requirements.txt
 ```
 
 ---
+## Screenshots
+
+### API Documentation
+
+![Swagger UI](docs/screenshots/swagger-page.png)
+
+### Create Meeting Session
+
+![Start Meeting](docs/screenshots/start-meeting.png)
+
+### Add Meeting Transcript
+
+![Meeting Input](docs/screenshots/meeting-input.png)
+
+### AI Generated Meeting Insights
+
+![Meeting Summary](docs/screenshots/meeting-result.png)
 
 ## License
 
