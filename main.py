@@ -1,5 +1,6 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from ai_service import AIService
 from meeting_manager import meeting_manager
 from file_storage import storage
@@ -9,11 +10,23 @@ from schemas import (
 )
 import tempfile
 import os
+import json
+import base64
+import io
 
 app = FastAPI(
     title="Meeting Intelligence System",
     description="Capture meeting data and generate structured insights (Notes, MoM, Action Items)",
     version="2.0.0"
+)
+
+# Enable CORS for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 ai_service = AIService()
@@ -33,6 +46,15 @@ def root():
             "File-based storage"
         ],
         "storage": stats
+    }
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for Docker and monitoring"""
+    return {
+        "status": "healthy",
+        "service": "Meeting Intelligence System",
+        "version": "2.0.0"
     }
 
 # ========== CONVERSATIONAL AI ENDPOINTS ==========
@@ -226,7 +248,11 @@ def stop_meeting():
         session = meeting_manager.stop_meeting()
         
         if not session.transcript:
-            raise HTTPException(400, "No transcript data captured")
+            raise HTTPException(
+                400, 
+                "No audio data captured. Please use 'Upload Audio' page or add text input before stopping. "
+                "For live audio capture, use the streaming_meeting.py script."
+            )
         
         # Generate comprehensive meeting notes
         notes = ai_service.generate_meeting_notes(
@@ -272,7 +298,8 @@ def get_meeting_notes(meeting_id: str):
 @app.get("/meetings")
 def get_all_meetings(limit: int = 50):
     """📚 Get all saved meetings"""
-    return storage.get_all_meetings(limit)
+    meetings = storage.get_all_meetings(limit)
+    return {"meetings": meetings, "total": len(meetings)}
 
 @app.get("/meetings/search")
 def search_meetings(query: str):
@@ -336,6 +363,131 @@ def health_check():
         "service": "meeting-intelligence",
         "storage": storage.get_stats()
     }
+
+# ========== WEBSOCKET FOR LIVE AUDIO STREAMING ==========
+
+@app.websocket("/ws/audio")
+async def websocket_audio_endpoint(websocket: WebSocket):
+    """🎙️ WebSocket endpoint for real-time audio streaming from browser"""
+    await websocket.accept()
+    print("🔌 WebSocket connected - Live audio stream ready")
+    
+    audio_buffer = bytearray()
+    chunk_duration = 10  # Process every 10 seconds of audio
+    
+    try:
+        while True:
+            # Receive audio chunk from browser
+            data = await websocket.receive()
+            
+            if "bytes" in data:
+                # Binary audio data
+                audio_chunk = data["bytes"]
+                audio_buffer.extend(audio_chunk)
+                
+                # Send acknowledgment
+                await websocket.send_json({
+                    "type": "ack",
+                    "buffer_size": len(audio_buffer)
+                })
+                
+            elif "text" in data:
+                # Control messages
+                message = json.loads(data["text"])
+                
+                if message.get("type") == "process":
+                    # Process accumulated audio
+                    if len(audio_buffer) > 0:
+                        try:
+                            print(f"📦 Processing {len(audio_buffer)} bytes of audio...")
+                            
+                            # Save audio buffer to temp file (WebM format from browser)
+                            with tempfile.NamedTemporaryFile(delete=False, suffix=".webm", mode='wb') as tmp:
+                                tmp.write(bytes(audio_buffer))
+                                tmp_path = tmp.name
+                            
+                            print(f"💾 Saved to: {tmp_path}")
+                            
+                            # Skip conversion for now - send WebM directly to Groq
+                            # Groq Whisper API actually supports WebM format
+                            print("📝 Sending WebM directly to Groq Whisper (supports WebM)...")
+                            
+                            # Transcribe WebM directly
+                            try:
+                                with open(tmp_path, "rb") as audio_file:
+                                    # Groq supports WebM, just send it
+                                    transcript, _ = ai_service.transcribe_audio(audio_file, filename="live_chunk.webm")
+                                print(f"✅ Transcript: {transcript[:100]}...")
+                            except Exception as trans_error:
+                                print(f"❌ Transcription failed: {trans_error}")
+                                # Clear buffer and continue
+                                audio_buffer.clear()
+                                os.unlink(tmp_path)
+                                await websocket.send_json({
+                                    "type": "error",
+                                    "message": f"Transcription failed. Try speaking louder or closer to microphone."
+                                })
+                                continue
+                            
+                            # Cleanup temp file
+                            try:
+                                os.unlink(tmp_path)
+                            except:
+                                pass
+                            
+                            # Add to active meeting
+                            session = meeting_manager.get_active_meeting()
+                            if session:
+                                meeting_manager.add_input(transcript)
+                                
+                                # Send transcript back to client
+                                await websocket.send_json({
+                                    "type": "transcript",
+                                    "text": transcript,
+                                    "meeting_id": session.meeting_id,
+                                    "transcript_length": session.get_transcript_length()
+                                })
+                                print(f"📤 Sent transcript to client")
+                            else:
+                                await websocket.send_json({
+                                    "type": "error",
+                                    "message": "No active meeting. Please start a meeting first."
+                                })
+                            
+                            # Clear buffer
+                            audio_buffer.clear()
+                            print("🧹 Buffer cleared")
+                            
+                        except Exception as e:
+                            print(f"❌ Processing error: {e}")
+                            import traceback
+                            traceback.print_exc()
+                            await websocket.send_json({
+                                "type": "error",
+                                "message": f"Audio processing failed: {str(e)}"
+                            })
+                            # Clear buffer even on error to avoid stuck state
+                            audio_buffer.clear()
+                    else:
+                        await websocket.send_json({
+                            "type": "info",
+                            "message": "No audio data to process"
+                        })
+                
+                elif message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+    
+    except WebSocketDisconnect:
+        print("🔌 WebSocket disconnected")
+    except Exception as e:
+        print(f"❌ WebSocket error: {e}")
+        try:
+            await websocket.send_json({
+                "type": "error",
+                "message": str(e)
+            })
+        except:
+            pass
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,27 @@
+.app {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--light-gray);
+}
+
+.main-content {
+  flex: 1;
+  transition: margin-left 0.3s ease;
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+}
+
+.main-content.sidebar-open {
+  margin-left: 260px;
+}
+
+.main-content.sidebar-closed {
+  margin-left: 80px;
+}
+
+@media (max-width: 768px) {
+  .main-content.sidebar-open,
+  .main-content.sidebar-closed {
+    margin-left: 0;
+  }
+}

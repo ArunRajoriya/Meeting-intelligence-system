@@ -2,7 +2,7 @@
 
 ### API Documentation
 
-![Swagger UI](docs/screenshots/swagger-page.png)
+![Swagger UI](docs/screenshots/dashboard-page.png)
 
 ### Create Meeting Session
 

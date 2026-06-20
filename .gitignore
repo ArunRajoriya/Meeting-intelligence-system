@@ -1,12 +1,14 @@
+# ======================
 # Python
+# ======================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 build/
-develop-eggs/
 dist/
+develop-eggs/
 downloads/
 eggs/
 .eggs/
@@ -20,60 +22,116 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+# ======================
+# Virtual Environments
+# ======================
 venv/
 env/
 ENV/
-.venv
+.venv/
 
+# ======================
 # Environment Variables
+# ======================
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
-# IDE
+# ======================
+# Node / React / Vite
+# ======================
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite
+vite.svg
+
+# Build Output
+frontend/dist/
+dist/
+
+# ======================
+# IDE & Editor
+# ======================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.history/
+
+# ======================
+# OS Files
+# ======================
 .DS_Store
+Thumbs.db
 
-# Meeting Data (optional - uncomment if you don't want to track meeting notes)
-# meeting_notes/*.json
-# meeting_notes/*.txt
-
+# ======================
 # Logs
+# ======================
 *.log
 logs/
 app.log
 
-# Audio files (test files)
-*.mp3
+# ======================
+# Audio Files
+# ======================
 *.wav
+*.mp3
 *.m4a
 *.ogg
 
-# Temporary files
-*.tmp
+# ======================
+# Temporary Files
+# ======================
 temp/
 tmp/
+*.tmp
 
-# Backup files
+# ======================
+# Backup Files
+# ======================
 backups/
 *.backup
 *.bak
 
-# OS
-Thumbs.db
-.DS_Store
-
+# ======================
 # Testing
+# ======================
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
 
-# Documentation builds
+# ======================
+# Documentation
+# ======================
 docs/_build/
 site/
+
+# ======================
+# Meeting Data (optional)
+# Uncomment if you don't want to track meeting notes
+# ======================
+# meeting_notes/*.json
+# meeting_notes/*.txt
+
+# ======================
+# Jupyter
+# ======================
+.ipynb_checkpoints/
+
+# ======================
+# Docker
+# ======================
+.dockerignore
+
+# ======================
+# Miscellaneous
+# ======================
+*.sqlite3
+*.db
