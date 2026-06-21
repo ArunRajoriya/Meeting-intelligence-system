@@ -259,15 +259,15 @@ const LiveMeeting = () => {
         console.log('✅ WebSocket connected');
         setIsCapturingAudio(true);
         
-        // Start recording
-        mediaRecorderRef.current.start(1000); // Send chunks every 1 second
+        // Start recording - send larger chunks every 5 seconds for valid WebM files
+        mediaRecorderRef.current.start(5000); // Send chunks every 5 seconds (increased from 1s)
         
-        // Process audio every 10 seconds
+        // Process accumulated audio every 15 seconds (increased from 10s)
         processIntervalRef.current = setInterval(() => {
           if (websocketRef.current?.readyState === WebSocket.OPEN) {
             websocketRef.current.send(JSON.stringify({ type: 'process' }));
           }
-        }, 10000);
+        }, 15000); // Process every 15 seconds to accumulate more audio
       };
       
       websocketRef.current.onmessage = (event) => {

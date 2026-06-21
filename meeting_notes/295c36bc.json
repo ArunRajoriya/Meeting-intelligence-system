@@ -1,0 +1,24 @@
+{
+  "meeting_id": "295c36bc",
+  "title": "Sample",
+  "participants": [
+    "A",
+    "B"
+  ],
+  "status": "completed",
+  "transcript": "and clear speech.",
+  "started_at": "2026-06-21T22:48:11.767307",
+  "notes": {
+    "meeting_id": "295c36bc",
+    "title": "Sample",
+    "date": "2026-06-21 22:49:03",
+    "participants": [
+      "A",
+      "B"
+    ],
+    "summary": "The meeting was a casual discussion between participants A and B. The transcript does not provide any specific objectives, outcomes, or decisions. There is no clear evidence of key outcomes, deliverables, or next steps. The conversation appears to be introductory, with no substantial topics or actions discussed. The meeting seems to have been an informal gathering with no formal agenda or conclusions. Given the lack of content, there are no critical decisions, permanent changes, or culture shifts to report. The meeting's purpose and outcomes are unclear due to the limited transcript provided.",
+    "key_decisions": [],
+    "action_items": []
+  },
+  "saved_at": "2026-06-21T22:49:03.612192"
+}

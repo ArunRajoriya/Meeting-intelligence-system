@@ -399,40 +399,156 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                 if message.get("type") == "process":
                     # Process accumulated audio
                     if len(audio_buffer) > 0:
+                        # Check if we have enough audio data (at least 100KB for a valid WebM)
+                        min_audio_size = 100 * 1024  # 100KB minimum (increased from 50KB)
+                        
+                        if len(audio_buffer) < min_audio_size:
+                            print(f"⚠️ Not enough audio data: {len(audio_buffer)} bytes (need at least {min_audio_size})")
+                            await websocket.send_json({
+                                "type": "info",
+                                "message": f"Collecting audio... ({len(audio_buffer) // 1024}KB buffered, need 100KB)"
+                            })
+                            continue
+                        
                         try:
-                            print(f"📦 Processing {len(audio_buffer)} bytes of audio...")
+                            print(f"📦 Processing {len(audio_buffer)} bytes ({len(audio_buffer) // 1024}KB) of audio...")
                             
                             # Save audio buffer to temp file (WebM format from browser)
                             with tempfile.NamedTemporaryFile(delete=False, suffix=".webm", mode='wb') as tmp:
                                 tmp.write(bytes(audio_buffer))
                                 tmp_path = tmp.name
                             
-                            print(f"💾 Saved to: {tmp_path}")
+                            print(f"💾 Saved WebM to: {tmp_path}")
                             
-                            # Skip conversion for now - send WebM directly to Groq
-                            # Groq Whisper API actually supports WebM format
-                            print("📝 Sending WebM directly to Groq Whisper (supports WebM)...")
+                            # Verify WebM file is valid before conversion
+                            webm_size = os.path.getsize(tmp_path)
+                            print(f"📊 WebM file size: {webm_size} bytes ({webm_size // 1024}KB)")
                             
-                            # Transcribe WebM directly
-                            try:
-                                with open(tmp_path, "rb") as audio_file:
-                                    # Groq supports WebM, just send it
-                                    transcript, _ = ai_service.transcribe_audio(audio_file, filename="live_chunk.webm")
-                                print(f"✅ Transcript: {transcript[:100]}...")
-                            except Exception as trans_error:
-                                print(f"❌ Transcription failed: {trans_error}")
-                                # Clear buffer and continue
+                            if webm_size < 10240:  # Less than 10KB is likely invalid
+                                print(f"⚠️ WebM file too small: {webm_size} bytes")
+                                await websocket.send_json({
+                                    "type": "info",
+                                    "message": "Audio file too small. Please speak for at least 20 seconds."
+                                })
                                 audio_buffer.clear()
                                 os.unlink(tmp_path)
-                                await websocket.send_json({
-                                    "type": "error",
-                                    "message": f"Transcription failed. Try speaking louder or closer to microphone."
-                                })
                                 continue
                             
-                            # Cleanup temp file
+                            # CRITICAL FIX: Convert WebM to WAV using FFmpeg for reliability
+                            # This ensures Groq Whisper gets a clean, standard audio format
+                            wav_path = tmp_path.replace('.webm', '.wav')
+                            
+                            # Try FFmpeg conversion first (most reliable)
+                            transcript = None
+                            confidence = 0.0
+                            audio_source = "unknown"
+                            
+                            try:
+                                import subprocess
+                                
+                                # Convert WebM to WAV using FFmpeg (installed in Docker/system)
+                                # -loglevel error: Only show actual errors
+                                print("🔧 Converting WebM to WAV using FFmpeg...")
+                                
+                                result = subprocess.run([
+                                    'ffmpeg',
+                                    '-loglevel', 'error',     # Only show actual errors
+                                    '-i', tmp_path,           # Input WebM
+                                    '-ar', '16000',           # 16kHz sample rate
+                                    '-ac', '1',               # Mono
+                                    '-f', 'wav',              # WAV format
+                                    '-y',                     # Overwrite
+                                    wav_path                  # Output WAV
+                                ], 
+                                capture_output=True, 
+                                text=True,
+                                timeout=10
+                                )
+                                
+                                if result.returncode != 0:
+                                    # FFmpeg failed - extract actual error
+                                    error_msg = result.stderr.strip() if result.stderr else "Unknown error"
+                                    print(f"❌ FFmpeg conversion failed (exit code {result.returncode})")
+                                    print(f"   Error: {error_msg[:300]}")
+                                    raise Exception(f"FFmpeg conversion failed")
+                                
+                                # Check if output file was created
+                                if not os.path.exists(wav_path):
+                                    raise Exception("FFmpeg did not create output file")
+                                
+                                # Check WAV file size
+                                wav_size = os.path.getsize(wav_path)
+                                print(f"✅ Converted to WAV: {wav_path}")
+                                print(f"📊 WAV file size: {wav_size} bytes ({wav_size // 1024}KB)")
+                                
+                                if wav_size < 1024:  # Less than 1KB is invalid
+                                    raise Exception("Converted audio file too small")
+                                
+                                # Transcribe the clean WAV file
+                                print("📝 Sending WAV to Groq Whisper...")
+                                with open(wav_path, "rb") as audio_file:
+                                    transcript, confidence = ai_service.transcribe_audio(audio_file, filename="live_chunk.wav")
+                                
+                                audio_source = "WAV (via FFmpeg)"
+                                
+                            except subprocess.TimeoutExpired:
+                                print("❌ FFmpeg conversion timeout")
+                            except FileNotFoundError:
+                                print("❌ FFmpeg not found in PATH")
+                            except Exception as conv_error:
+                                print(f"❌ FFmpeg conversion/transcription failed: {conv_error}")
+                            
+                            # FALLBACK: If FFmpeg failed, try direct WebM transcription
+                            if not transcript:
+                                print("⚠️ Trying direct WebM transcription as fallback...")
+                                try:
+                                    with open(tmp_path, "rb") as audio_file:
+                                        transcript, confidence = ai_service.transcribe_audio(audio_file, filename="live_chunk.webm")
+                                    audio_source = "WebM (direct)"
+                                except Exception as webm_error:
+                                    print(f"❌ Direct WebM transcription also failed: {webm_error}")
+                            
+                            # Check if we got a transcript from either method
+                            if not transcript or transcript.strip() == "":
+                                print(f"⚠️ No transcript obtained from either method")
+                                await websocket.send_json({
+                                    "type": "info",
+                                    "message": "No speech detected. Please speak louder and more clearly."
+                                })
+                                audio_buffer.clear()
+                                # Cleanup temp files
+                                try:
+                                    os.unlink(tmp_path)
+                                    if os.path.exists(wav_path):
+                                        os.unlink(wav_path)
+                                except:
+                                    pass
+                                continue
+                            
+                            # Check transcript quality
+                            word_count = len(transcript.split())
+                            if word_count < 3:
+                                print(f"⚠️ Low quality transcript: {word_count} words, confidence: {confidence:.2f}")
+                                await websocket.send_json({
+                                    "type": "info",
+                                    "message": f"Low quality audio detected. Keep speaking..."
+                                })
+                                audio_buffer.clear()
+                                # Cleanup temp files
+                                try:
+                                    os.unlink(tmp_path)
+                                    if os.path.exists(wav_path):
+                                        os.unlink(wav_path)
+                                except:
+                                    pass
+                                continue
+                            
+                            print(f"✅ Transcript from {audio_source} ({word_count} words, confidence: {confidence:.2f}): {transcript[:100]}...")
+                            
+                            # Cleanup temp files
                             try:
                                 os.unlink(tmp_path)
+                                os.unlink(wav_path)
                             except:
                                 pass
                             

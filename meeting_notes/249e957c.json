@@ -1,0 +1,24 @@
+{
+  "meeting_id": "249e957c",
+  "title": "Sample",
+  "participants": [
+    "A",
+    "B"
+  ],
+  "status": "completed",
+  "transcript": "and hearing discussion with clear speech.",
+  "started_at": "2026-06-21T23:06:37.858178",
+  "notes": {
+    "meeting_id": "249e957c",
+    "title": "Sample",
+    "date": "2026-06-21 23:07:50",
+    "participants": [
+      "A",
+      "B"
+    ],
+    "summary": "The meeting was a casual discussion between participants A and B. The transcript does not provide clear information about the primary meeting objective or key outcomes. No critical decisions or permanent changes were mentioned. There are no next steps or timeline discussed in the transcript.",
+    "key_decisions": [],
+    "action_items": []
+  },
+  "saved_at": "2026-06-21T23:07:50.860414"
+}

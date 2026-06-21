@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL =
-"https://ai-powered-meeting-intelligence-platform.onrender.com";
+// Use localhost for Docker deployment
+// Change this to your production URL when deploying
+const API_BASE_URL = "http://localhost:8000";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
