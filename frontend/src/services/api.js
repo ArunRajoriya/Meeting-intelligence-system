@@ -25,8 +25,20 @@ export const meetingAPI = {
   },
 
   // Stop active meeting
-  stopMeeting: async () => {
-    const response = await api.post('/meeting/stop');
+  stopMeeting: async (force = false) => {
+    const response = await api.post(`/meeting/stop?force=${force}`);
+    return response.data;
+  },
+
+  // Cancel active meeting (force stop without notes)
+  cancelMeeting: async () => {
+    const response = await api.post('/meeting/stop?force=true');
+    return response.data;
+  },
+
+  // Reset meeting (clear stuck meeting)
+  resetMeeting: async () => {
+    const response = await api.post('/meeting/reset');
     return response.data;
   },
 

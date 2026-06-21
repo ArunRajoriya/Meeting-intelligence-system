@@ -251,8 +251,14 @@ const LiveMeeting = () => {
       });
       
       // Connect to WebSocket
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${wsProtocol}//localhost:8000/ws/audio`;
+      // Use environment variable for WebSocket URL (same as REST API)
+      const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const apiUrl = new URL(apiBaseUrl);
+      const wsProtocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = apiUrl.host; // Gets hostname:port
+      const wsUrl = `${wsProtocol}//${wsHost}/ws/audio`;
+      
+      console.log('🔌 Connecting to WebSocket:', wsUrl);
       websocketRef.current = new WebSocket(wsUrl);
       
       websocketRef.current.onopen = () => {

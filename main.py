@@ -249,18 +249,34 @@ def get_meeting_status():
         started_at=session.started_at
     )
 
-@app.post("/meeting/stop", response_model=MeetingNotes)
-def stop_meeting():
-    """🔴 STOP meeting and generate insights (Notes, MoM, Decisions, Action Items)"""
+@app.post("/meeting/stop")
+def stop_meeting(force: bool = False):
+    """🔴 STOP meeting and generate insights (Notes, MoM, Decisions, Action Items)
+    
+    Query parameter:
+    - force: If true, cancel meeting without generating notes (for meetings without transcript)
+    """
     try:
         session = meeting_manager.stop_meeting()
         
-        if not session.transcript:
-            raise HTTPException(
-                400, 
-                "No audio data captured. Please use 'Upload Audio' page or add text input before stopping. "
-                "For live audio capture, use the streaming_meeting.py script."
-            )
+        # If force stop or no transcript, return empty meeting without notes
+        if force or not session.transcript:
+            if not session.transcript:
+                print("⚠️ Meeting stopped without transcript - no notes generated")
+            else:
+                print("🔴 Force stop - no notes generated")
+            
+            # Return minimal response
+            return {
+                "meeting_id": session.meeting_id,
+                "title": session.title,
+                "participants": session.participants,
+                "summary": "Meeting was stopped without generating notes (no transcript data).",
+                "key_decisions": [],
+                "action_items": [],
+                "status": "cancelled",
+                "message": "Meeting cancelled successfully. No transcript data was available to generate notes."
+            }
         
         # Generate comprehensive meeting notes
         notes = ai_service.generate_meeting_notes(
