@@ -364,12 +364,7 @@ def health_check():
         "storage": storage.get_stats()
     }
 
-@app.get("/meeting/status")
-async def meeting_status():
-    return {
-        "status": "active",
-        "is_recording": False
-    }
+
 # ========== WEBSOCKET FOR LIVE AUDIO STREAMING ==========
 
 @app.websocket("/ws/audio")
