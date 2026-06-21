@@ -1,8 +1,10 @@
 import axios from 'axios';
 
-// Use localhost for Docker deployment
-// Change this to your production URL when deploying
-const API_BASE_URL = "http://localhost:8000";
+// Use environment variable in production, fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+// Log for debugging (remove in production)
+console.log('🔗 API Base URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
